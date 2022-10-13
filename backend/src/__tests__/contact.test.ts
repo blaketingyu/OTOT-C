@@ -7,7 +7,7 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import { Mongoose } from "mongoose";
 
 let validContactId = "";
-let invalidContactId ="-1"
+let invalidContactId = "-1";
 const app = createServer();
 
 beforeAll(async () => {
@@ -44,9 +44,9 @@ describe("POST", () => {
       const res = await request(app).post("/api/contacts").send({
         name: "Dog",
         gender: "dog",
-        phone: "dog"
-    });
-    
+        phone: "dog",
+      });
+
       expect(res.statusCode).toBe(405);
       expect(res.body.status).toBe("error");
       expect(res.body.message).toBe("email and name cannot be empty!");
@@ -61,7 +61,7 @@ describe("POST", () => {
         name: "Dog",
         email: "dog",
         gender: "dog",
-        phone: "dog"
+        phone: "dog",
       });
       validContactId = res.body.data._id;
       expect(res.statusCode).toBe(200);
@@ -76,75 +76,76 @@ describe("POST", () => {
 });
 
 describe("PATCH", () => {
-    describe("Valid contact", () => {
-      test("returns success", async () => {
-        const res = await request(app).patch(`/api/contacts/${validContactId}`);
-        expect(res.statusCode).toBe(200);
-        expect(res.body.status).toBe("success");
-        expect(res.body.message).toBe("Contact details loading..");
-        expect(res.body.data).not.toBeNull();
-      });
+  describe("Valid contact", () => {
+    test("returns success", async () => {
+      const res = await request(app).patch(`/api/contacts/${validContactId}`);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.status).toBe("success");
+      expect(res.body.message).toBe("Contact details loading..");
+      expect(res.body.data).not.toBeNull();
     });
   });
+});
 
-  describe("PATCH", () => {
-    describe("Invalid contact", () => {
-      test("returns error", async () => {
-        const res = await request(app).patch(`/api/contacts/${invalidContactId}`);
-        expect(res.statusCode).toBe(404);
-        expect(res.body.status).toBe("error");
-        expect(res.body.message).toBe("not a valid id");
-      });
+describe("PATCH", () => {
+  describe("Invalid contact", () => {
+    test("returns error", async () => {
+      const res = await request(app).patch(`/api/contacts/${invalidContactId}`);
+      expect(res.statusCode).toBe(405);
+      expect(res.body.status).toBe("error");
+      expect(res.body.message).toBe("not a valid id");
     });
-})
-
-    describe("PATCH", () => {
-        describe("Valid contact", () => {
-          test("returns success", async () => {
-            const res = await request(app).patch(`/api/contacts/${validContactId}`);
-            expect(res.statusCode).toBe(200);
-            expect(res.body.status).toBe("success");
-            expect(res.body.message).toBe("Contact details loading..");
-          });
-        });
   });
+});
 
-  describe("PUT", () => {
-    describe("invalid contact", () => {
-      test("returns error", async () => {
-        const res = await request(app).put(`/api/contacts/${invalidContactId}`);
-        expect(res.statusCode).toBe(404);
-        expect(res.body.status).toBe("error");
-        expect(res.body.message).toBe("invalid id");
-      });
+describe("PATCH", () => {
+  describe("Valid contact", () => {
+    test("returns success", async () => {
+      const res = await request(app).patch(`/api/contacts/${validContactId}`);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.status).toBe("success");
+      expect(res.body.message).toBe("Contact details loading..");
     });
+  });
 });
 
 describe("PUT", () => {
-    describe("Valid contact", () => {
-      test("returns success", async () => {
-        const res = await request(app)
+  describe("invalid contact", () => {
+    test("returns error", async () => {
+      const res = await request(app).put(`/api/contacts/${invalidContactId}`);
+      expect(res.statusCode).toBe(405);
+      expect(res.body.status).toBe("error");
+      expect(res.body.message).toBe("invalid id");
+    });
+  });
+});
+
+describe("PUT", () => {
+  describe("Valid contact", () => {
+    test("returns success", async () => {
+      const res = await request(app)
         .put(`/api/contacts/${validContactId}`)
         .send({
-            "name":"Cat"
+          name: "Cat",
         });
-        expect(res.statusCode).toBe(200);
-        expect(res.body.status).toBe("success");
-        expect(res.body.message).toBe("Contact Info updated");
-        expect(res.body.data._id).toEqual(validContactId);
-        expect(res.body.data.name).toEqual("Cat");
-        expect(res.body.data.gender).toEqual("dog");
-        expect(res.body.data.phone).toEqual("dog");
-      });
+      expect(res.statusCode).toBe(200);
+      expect(res.body.status).toBe("success");
+      expect(res.body.message).toBe("Contact Info updated");
+      expect(res.body.data._id).toEqual(validContactId);
+      expect(res.body.data.name).toEqual("Cat");
+      expect(res.body.data.gender).toEqual("dog");
+      expect(res.body.data.phone).toEqual("dog");
     });
+  });
 });
 
 describe("DELETE", () => {
   describe("invalid contact", () => {
     test("returns error", async () => {
-      const res = await request(app)
-      .delete(`/api/contacts/${invalidContactId}`);
-      expect(res.statusCode).toBe(404);
+      const res = await request(app).delete(
+        `/api/contacts/${invalidContactId}`
+      );
+      expect(res.statusCode).toBe(405);
       expect(res.body.status).toBe("error");
       expect(res.body.message).toBe("invalid id");
     });
@@ -154,12 +155,10 @@ describe("DELETE", () => {
 describe("DELETE", () => {
   describe("Valid contact", () => {
     test("returns success", async () => {
-      const res = await request(app)
-      .delete(`/api/contacts/${validContactId}`);
+      const res = await request(app).delete(`/api/contacts/${validContactId}`);
       expect(res.statusCode).toBe(200);
       expect(res.body.status).toBe("success");
       expect(res.body.message).toBe("Contact deleted");
     });
   });
 });
-

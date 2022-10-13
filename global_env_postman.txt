@@ -1,3 +1,0 @@
-DEPLOYMENT_URL: https://otot-b-bwo66nc7ba-as.a.run.app
-VALID_ID : 632ad07c283f7bf3c2348d26
-INVALID_ID: -1
