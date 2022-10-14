@@ -1,17 +1,21 @@
 //guide used https://www.youtube.com/watch?v=mbsmsi7l3r4&ab_channel=WebDevSimplified
 //https://github.com/WebDevSimplified/JWT-Authentication
 
-import jwt, { Secret, JwtPayload } from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../src/config";
 import { NextFunction, Request, Response } from "express";
-import { User } from "../models/userModel";
+import { User, UserDocument } from "../models/userModel";
 //import { hashPassword } from "./userController";
 import bcrypt from "bcrypt";
 import { RefreshToken } from "../models/refreshtokenModel";
-import { access } from "fs";
 
 export interface IGetUserAuthInfoRequest extends Request {
-  user: typeof User; // or any other type
+  user: UserDocument; // or any other type
+}
+
+export interface JwtPayload {
+  username: string;
+  userPassword: string;
 }
 
 //Authentication
@@ -23,7 +27,7 @@ function createAccessToken({
   userPassword: string;
 }) {
   return jwt.sign({ username, userPassword }, ACCESS_TOKEN, {
-    expiresIn: "10m",
+    expiresIn: "1h",
   });
 }
 
@@ -101,36 +105,61 @@ export async function signin(req: Request, res: Response) {
   }
 }
 
-export async function AuthenticateToken(
+export async function AuthenticateTokenUser(
   req: IGetUserAuthInfoRequest,
   res: Response,
   next: NextFunction
 ) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; //Undefined or actual token
+  if (!token) {
+    return res.status(401).json({ status: "error", message: "Unauthorized" }); //No token
+  }
+
   try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1]; //Undefined or actual token
-    if (!token) {
-      return res.status(401).json({ status: "error", message: "Unauthorized" }); //No token
-    }
+    const reqToken = jwt.verify(token, ACCESS_TOKEN) as JwtPayload;
 
-    try {
-      jwt.verify(token, ACCESS_TOKEN, (err: Error, user: typeof User) => {
-        if (err) {
-          return res
-            .status(403)
-            .json({ status: "error", message: "Forbidden" }); //No token
-        }
+    console.log(reqToken.username);
+    const findUser = await User.findOne({ name: reqToken.username });
+    console.log(`user: ${findUser.name}, ${findUser.hashPassword}`);
 
-        req.user = user;
-        next();
-      });
-    } catch (err) {
-      return res
-        .status(500)
-        .json({ status: "error", message: "Internal server error" });
+    let tempArr = ["admin", "user"];
+    if (!findUser.userRole || !tempArr.includes(findUser.userRole)) {
+      return res.status(403).json({ status: "error", message: "Forbidden" });
     }
+    req.user = findUser;
+    next();
   } catch (err) {
-    console.log(err);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Internal server error" });
+  }
+}
+
+export async function AuthenticateTokenAdmin(
+  req: IGetUserAuthInfoRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; //Undefined or actual token
+  if (!token) {
+    return res.status(401).json({ status: "error", message: "Unauthorized" }); //No token
+  }
+
+  try {
+    const reqToken = jwt.verify(token, ACCESS_TOKEN) as JwtPayload;
+
+    console.log(reqToken.username);
+    const findUser = await User.findOne({ name: reqToken.username });
+    console.log(`user: ${findUser.name}, ${findUser.hashPassword}`);
+
+    if (!findUser.userRole || findUser.userRole != "admin") {
+      return res.status(403).json({ status: "error", message: "Forbidden" });
+    }
+    req.user = findUser;
+    next();
+  } catch (err) {
     return res
       .status(500)
       .json({ status: "error", message: "Internal server error" });
