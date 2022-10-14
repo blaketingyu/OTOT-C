@@ -31,3 +31,10 @@ apiRoutes.route("/register/user").post(UserController.registerUser);
 apiRoutes.route("/register/admin").post(UserController.registerAdmin);
 apiRoutes.route("/signin").post(AuthController.signin);
 apiRoutes.route("/signout").post(AuthController.signout);
+
+apiRoutes
+  .route("/admin-only")
+  .get(AuthController.AuthenticateTokenAdmin, AuthController.adminOnly);
+apiRoutes
+  .route("/user-admin")
+  .get(AuthController.AuthenticateTokenUser, AuthController.userAndAdmin);

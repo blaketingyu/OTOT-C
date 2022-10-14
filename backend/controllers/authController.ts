@@ -205,3 +205,19 @@ export async function signout(req: Request, res: Response) {
     });
   }
 }
+
+export async function adminOnly(req: Request, res: Response) {
+  return res.status(200).json({
+    code: "200",
+    status: "success",
+    message: "Admin Only Test",
+  });
+}
+
+export async function userAndAdmin(req: Request, res: Response) {
+  return res.status(200).json({
+    code: "200",
+    status: "success",
+    message: "Successfully accessed both user and admin API endpoint",
+  });
+}
