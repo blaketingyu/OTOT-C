@@ -43,7 +43,7 @@ export function newContact(req: Request, res: Response) {
         status: "error",
         message: "Internal server error, cant save new contact",
       });
-    res.status(200).json({
+    res.status(201).json({
       status: "success",
       message: "New contact created!",
       data: newContact,

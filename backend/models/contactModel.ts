@@ -1,15 +1,15 @@
-import mongoose, {Schema, Model, Document} from "mongoose";
+import mongoose, { Schema, Model, Document } from "mongoose";
 
 type ContactDocument = Document & {
-  name: String;
-  email: String;
-  gender: String;
-  phone: String;
+  name: string;
+  email: string;
+  gender: string;
+  phone: string;
   create_date: Date;
-}
+};
 
 // Setup schema
-const contactSchema = new Schema ({
+const contactSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -27,6 +27,8 @@ const contactSchema = new Schema ({
 });
 
 // Export Contact model
-const Contact: Model<ContactDocument> = mongoose.model<ContactDocument>("contact", contactSchema);
-export {Contact, ContactDocument, contactSchema};
-
+const Contact: Model<ContactDocument> = mongoose.model<ContactDocument>(
+  "contact",
+  contactSchema
+);
+export { Contact, ContactDocument, contactSchema };
