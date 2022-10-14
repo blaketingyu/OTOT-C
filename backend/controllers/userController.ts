@@ -42,9 +42,9 @@ export async function registerUser(req: Request, res: Response) {
 //Register user
 export async function registerAdmin(req: Request, res: Response) {
   try {
-    const user = await User.find({ name: req.body.name });
+    const user = await User.findOne({ name: req.body.name });
     if (user) {
-      return res.status(409).send("A user with the same name already exists");
+      return res.status(409).send("Invalid Credentials");
     }
 
     //Bcrypting the password

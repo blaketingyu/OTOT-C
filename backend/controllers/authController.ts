@@ -26,9 +26,11 @@ function createAccessToken({
   username: string;
   userPassword: string;
 }) {
-  return jwt.sign({ username, userPassword }, ACCESS_TOKEN, {
-    expiresIn: "1h",
+  return jwt.sign({ username, userPassword }, REFRESH_TOKEN, {
+    expiresIn: "30m",
   });
+
+  //return jwt.sign({ username, userPassword }, ACCESS_TOKEN);
 }
 
 //Authentication
@@ -39,6 +41,8 @@ function createRefreshToken({
   username: string;
   userPassword: string;
 }) {
+  //return jwt.sign({ username, userPassword }, REFRESH_TOKEN);
+
   return jwt.sign({ username, userPassword }, REFRESH_TOKEN, {
     expiresIn: "1h",
   });
@@ -78,9 +82,11 @@ export async function signin(req: Request, res: Response) {
         token.save((err) => {
           if (err) {
             console.log(err);
-            return res
-              .status(500)
-              .json({ status: "error", message: "Internal server error" });
+            return res.status(500).json({
+              code: "500",
+              status: "error",
+              message: "Internal server error",
+            });
           }
         });
         res
@@ -88,20 +94,22 @@ export async function signin(req: Request, res: Response) {
           .json({ accessToken: accessToken, refreshToken: refreshToken });
       } else {
         //Wrong password
-        return res
-          .status(401)
-          .json({ status: "error", message: "Invalid credentials" });
+        return res.status(401).json({
+          code: "401",
+          status: "error",
+          message: "Invalid credentials",
+        });
       }
     } catch (err) {
       return res
         .status(401)
-        .json({ status: "error", message: "Invalid credentials" });
+        .json({ code: "401", status: "error", message: "Invalid credentials" });
     }
   } catch (err) {
     console.log(err);
     return res
       .status(500)
-      .json({ status: "error", message: "Internal server error" });
+      .json({ code: "500", status: "error", message: "Internal server error" });
   }
 }
 
@@ -113,7 +121,9 @@ export async function AuthenticateTokenUser(
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1]; //Undefined or actual token
   if (!token) {
-    return res.status(401).json({ status: "error", message: "Unauthorized" }); //No token
+    return res
+      .status(401)
+      .json({ code: "401", status: "error", message: "Unauthorized" }); //No token
   }
 
   try {
@@ -155,14 +165,16 @@ export async function AuthenticateTokenAdmin(
     console.log(`user: ${findUser.name}, ${findUser.hashPassword}`);
 
     if (!findUser.userRole || findUser.userRole != "admin") {
-      return res.status(403).json({ status: "error", message: "Forbidden" });
+      return res
+        .status(403)
+        .json({ code: "403", status: "error", message: "Forbidden" });
     }
     req.user = findUser;
     next();
   } catch (err) {
     return res
       .status(500)
-      .json({ status: "error", message: "Internal server error" });
+      .json({ code: "500", status: "error", message: "Internal server error" });
   }
 }
 
@@ -174,17 +186,20 @@ export async function signout(req: Request, res: Response) {
         console.log(err);
         return res.status(500).json({
           status: "error",
+          code: "500",
           message: "Internal server error, cant save new user",
         });
       }
     });
     return res.status(200).json({
+      code: "200",
       status: "success",
       message: "successfully signout",
     });
   } catch (err) {
     console.log(err);
     return res.status(500).json({
+      code: "500",
       status: "error",
       message: "Internal server error, cant save new user",
     });
