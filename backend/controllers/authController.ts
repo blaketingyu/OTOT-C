@@ -1,5 +1,6 @@
 //guide used https://www.youtube.com/watch?v=mbsmsi7l3r4&ab_channel=WebDevSimplified
 //https://github.com/WebDevSimplified/JWT-Authentication
+//https://stackoverflow.com/questions/49503124/how-to-combine-passport-jwt-with-aclaccess-control-list-pattern
 
 import * as jwt from "jsonwebtoken";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../src/config";

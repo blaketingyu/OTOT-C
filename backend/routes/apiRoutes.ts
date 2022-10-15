@@ -36,4 +36,6 @@ apiRoutes
   .route("/admin-only")
   .get(AuthController.AuthenticateTokenAdmin, AuthController.adminOnly);
 
-apiRoutes.route("/accesstoken").post(AuthController.getAccessToken);
+apiRoutes
+  .route("/accesstoken")
+  .post(AuthController.AuthenticateTokenUser, AuthController.getAccessToken);
