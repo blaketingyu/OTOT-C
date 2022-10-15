@@ -26,7 +26,7 @@ function createAccessToken({
   username: string;
   userPassword: string;
 }) {
-  return jwt.sign({ username, userPassword }, REFRESH_TOKEN, {
+  return jwt.sign({ username, userPassword }, ACCESS_TOKEN, {
     expiresIn: "30m",
   });
 
@@ -127,10 +127,11 @@ export async function AuthenticateTokenUser(
   }
 
   try {
-    const reqToken = jwt.verify(token, ACCESS_TOKEN) as JwtPayload;
+    const reqToken = jwt.verify(token, ACCESS_TOKEN);
+    const { username, userPassword } = reqToken as JwtPayload;
 
-    console.log(reqToken.username);
-    const findUser = await User.findOne({ name: reqToken.username });
+    console.log(username);
+    const findUser = await User.findOne({ name: username });
     console.log(`user: ${findUser.name}, ${findUser.hashPassword}`);
 
     let tempArr = ["admin", "user"];
@@ -181,7 +182,7 @@ export async function AuthenticateTokenAdmin(
 export async function signout(req: Request, res: Response) {
   try {
     const token = req.body.token;
-    RefreshToken.remove({ token }, (err: Error) => {
+    RefreshToken.deleteMany({ token }, (err: Error) => {
       if (err) {
         console.log(err);
         return res.status(500).json({
@@ -220,4 +221,26 @@ export async function userAndAdmin(req: Request, res: Response) {
     status: "success",
     message: "Successfully accessed both user and admin API endpoint",
   });
+}
+
+export async function getAccessToken(req: Request, res: Response) {
+  try {
+    const refreshToken = req.body.token;
+    if (refreshToken == null) return res.sendStatus(401);
+    const tokens = await RefreshToken.find({ token: refreshToken });
+    if (tokens.length == 0) {
+      return res.sendStatus(403);
+    }
+    const verification = jwt.verify(refreshToken, REFRESH_TOKEN);
+    const { username, userPassword } = verification as JwtPayload;
+    console.log(username);
+    const accessToken = createAccessToken({
+      username: username,
+      userPassword: userPassword,
+    });
+    return res.status(200).json({ accessToken: accessToken });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
 }

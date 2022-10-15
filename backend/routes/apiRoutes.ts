@@ -38,3 +38,5 @@ apiRoutes
 apiRoutes
   .route("/user-admin")
   .get(AuthController.AuthenticateTokenUser, AuthController.userAndAdmin);
+
+apiRoutes.route("/accesstoken").post(AuthController.getAccessToken);
