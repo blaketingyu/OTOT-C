@@ -35,8 +35,5 @@ apiRoutes.route("/signout").post(AuthController.signout);
 apiRoutes
   .route("/admin-only")
   .get(AuthController.AuthenticateTokenAdmin, AuthController.adminOnly);
-apiRoutes
-  .route("/user-admin")
-  .get(AuthController.AuthenticateTokenUser, AuthController.userAndAdmin);
 
 apiRoutes.route("/accesstoken").post(AuthController.getAccessToken);

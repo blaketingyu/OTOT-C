@@ -2,6 +2,11 @@ import { User } from "../models/userModel";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 
+export enum ROLES {
+  USER = "user",
+  ADMIN = "admin",
+}
+
 export async function hashPassword(password: string) {
   const salt = await bcrypt.genSalt();
   return await bcrypt.hash(password, salt);
@@ -20,7 +25,7 @@ export async function registerUser(req: Request, res: Response) {
     const newUser = new User();
     newUser.name = req.body.name;
     newUser.hashPassword = hashed;
-    newUser.userRole = "user";
+    newUser.userRole.push(ROLES.USER);
     newUser.save((err) => {
       if (err)
         return res.status(500).json({
@@ -53,7 +58,7 @@ export async function registerAdmin(req: Request, res: Response) {
     const newUser = new User();
     newUser.name = req.body.name;
     newUser.hashPassword = hashed;
-    newUser.userRole = "admin";
+    newUser.userRole.push(ROLES.USER, ROLES.ADMIN);
     newUser.save((err) => {
       if (err)
         return res.status(500).json({

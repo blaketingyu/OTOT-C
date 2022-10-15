@@ -5,7 +5,7 @@ import * as jwt from "jsonwebtoken";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../src/config";
 import { NextFunction, Request, Response } from "express";
 import { User, UserDocument } from "../models/userModel";
-//import { hashPassword } from "./userController";
+import { ROLES } from "./userController";
 import bcrypt from "bcrypt";
 import { RefreshToken } from "../models/refreshtokenModel";
 
@@ -134,8 +134,7 @@ export async function AuthenticateTokenUser(
     const findUser = await User.findOne({ name: username });
     console.log(`user: ${findUser.name}, ${findUser.hashPassword}`);
 
-    let tempArr = ["admin", "user"];
-    if (!findUser.userRole || !tempArr.includes(findUser.userRole)) {
+    if (!findUser.userRole || !findUser.userRole.includes(ROLES.USER)) {
       return res.status(403).json({ status: "error", message: "Forbidden" });
     }
     req.user = findUser;
@@ -165,7 +164,7 @@ export async function AuthenticateTokenAdmin(
     const findUser = await User.findOne({ name: reqToken.username });
     console.log(`user: ${findUser.name}, ${findUser.hashPassword}`);
 
-    if (!findUser.userRole || findUser.userRole != "admin") {
+    if (!findUser.userRole || !findUser.userRole.includes(ROLES.ADMIN)) {
       return res
         .status(403)
         .json({ code: "403", status: "error", message: "Forbidden" });
@@ -212,14 +211,6 @@ export async function adminOnly(req: Request, res: Response) {
     code: "200",
     status: "success",
     message: "Admin Only Test",
-  });
-}
-
-export async function userAndAdmin(req: Request, res: Response) {
-  return res.status(200).json({
-    code: "200",
-    status: "success",
-    message: "Successfully accessed both user and admin API endpoint",
   });
 }
 

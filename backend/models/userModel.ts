@@ -3,7 +3,7 @@ import mongoose, { Schema, Model, Document } from "mongoose";
 type UserDocument = Document & {
   name: string;
   hashPassword: string;
-  userRole: string;
+  userRole: [string];
 };
 
 //Setup Schema
@@ -17,7 +17,7 @@ const userSchema = new Schema({
     required: true,
   },
   userRole: {
-    type: String,
+    type: [String],
     required: true,
   },
 });
