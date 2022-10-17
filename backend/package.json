@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --project ./",
-    "start:dev": "nodemon src/app.ts",
+    "dev": "nodemon src/app.ts",
     "start:prod": "node app.js",
     "test": "jest",
     "test:watch": "jest --watch"

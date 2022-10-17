@@ -114,71 +114,6 @@ export async function signin(req: Request, res: Response) {
   }
 }
 
-export async function AuthenticateTokenUser(
-  req: IGetUserAuthInfoRequest,
-  res: Response,
-  next: NextFunction
-) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; //Undefined or actual token
-  if (!token) {
-    return res
-      .status(401)
-      .json({ code: "401", status: "error", message: "Unauthorized" }); //No token
-  }
-
-  try {
-    const reqToken = jwt.verify(token, ACCESS_TOKEN);
-    const { username, userPassword } = reqToken as JwtPayload;
-
-    console.log(username);
-    const findUser = await User.findOne({ name: username });
-    console.log(`user: ${findUser.name}, ${findUser.hashPassword}`);
-
-    if (!findUser.userRole || !findUser.userRole.includes(ROLES.USER)) {
-      return res.status(403).json({ status: "error", message: "Forbidden" });
-    }
-    req.user = findUser;
-    next();
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ status: "error", message: "Internal server error" });
-  }
-}
-
-export async function AuthenticateTokenAdmin(
-  req: IGetUserAuthInfoRequest,
-  res: Response,
-  next: NextFunction
-) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; //Undefined or actual token
-  if (!token) {
-    return res.status(401).json({ status: "error", message: "Unauthorized" }); //No token
-  }
-
-  try {
-    const reqToken = jwt.verify(token, ACCESS_TOKEN) as JwtPayload;
-
-    console.log(reqToken.username);
-    const findUser = await User.findOne({ name: reqToken.username });
-    console.log(`user: ${findUser.name}, ${findUser.hashPassword}`);
-
-    if (!findUser.userRole || !findUser.userRole.includes(ROLES.ADMIN)) {
-      return res
-        .status(403)
-        .json({ code: "403", status: "error", message: "Forbidden" });
-    }
-    req.user = findUser;
-    next();
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ code: "500", status: "error", message: "Internal server error" });
-  }
-}
-
 export async function signout(req: Request, res: Response) {
   try {
     const token = req.body.token;
@@ -236,3 +171,39 @@ export async function getAccessToken(req: Request, res: Response) {
     res.sendStatus(500);
   }
 }
+
+export const AuthenticateRole = (roles: string[]) => {
+  return async (
+    req: IGetUserAuthInfoRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1]; //Undefined or actual token
+    if (!token) {
+      return res.status(401).json({ status: "error", message: "Unauthorized" }); //No token
+    }
+
+    try {
+      const reqToken = jwt.verify(token, ACCESS_TOKEN) as JwtPayload;
+
+      console.log(reqToken.username);
+      const findUser = await User.findOne({ name: reqToken.username });
+      console.log(`user: ${findUser.name}, ${findUser.hashPassword}`);
+
+      if (!findUser.userRole || !findUser.userRole.includes(ROLES.ADMIN)) {
+        return res
+          .status(403)
+          .json({ code: "403", status: "error", message: "Forbidden" });
+      }
+      req.user = findUser;
+      next();
+    } catch (err) {
+      return res.status(500).json({
+        code: "500",
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+  };
+};
